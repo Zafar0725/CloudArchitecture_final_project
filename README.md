@@ -1,73 +1,71 @@
-# Final Individual Project – AWS Infrastructure as Code
+# Final Individual Project – Infrastructure as Code (AWS)
 
-**Name:** Zafar Ahmed  
+**Student:** Shaik Zafar Ahmed  
 **Student ID:** 9027671  
-**Tools Used:** Terraform & AWS CloudFormation  
-**Cloud Provider:** AWS (us-east-1)
+**Project:** Comprehensive AWS Infrastructure using Terraform & CloudFormation  
+**Region:** us-east-1 (N. Virginia)  
+**Tools Used:** Terraform, AWS CloudFormation, AWS Console
 
 ---
 
-## 📍 Project Summary
+## 🎯 Project Objective
 
-This project automates the deployment of a secure cloud infrastructure using **Infrastructure as Code (IaC).**  
-Two automation tools were used:
+The objective of this project is to provision a full cloud architecture on AWS using two different IaC tools:
 
-| IaC Tool | Resources Deployed |
-|---------|------------------|
-| Terraform | 4 S3 Buckets, VPC + Subnet + EC2, RDS MySQL |
-| CloudFormation | 3 S3 Buckets, VPC + EC2, RDS MySQL |
+- **Terraform** (main deployment automation)
+- **AWS CloudFormation** (secondary deployment validation)
 
-All resources are deployed automatically **without manual configuration**.
+The design follows industry best practices:
+- Infrastructure must be fully **automated**
+- Networking and security must be **properly configured**
+- No sensitive info committed to version control
+- Resources must be **easily reproducible and deletable**
 
 ---
 
-## ⚙️ Terraform Infrastructure
+## 🏗️ Infrastructure Architecture (High-Level)
+
+                +-------------------+
+                |  S3 Buckets       |
+                | (Terraform)       |
+                +-------------------+
+
+                +-------------------------+
+Internet  --->  |  EC2 Instance in VPC    |
+                |  Public Subnet + IGW    |
+                |  SSH only from my IP    |
+                +-------------------------+
+
+                +-------------------------+
+                |  MySQL RDS Database     |
+                |  Private Subnets        |
+                |  SG: My IP only (3306)  |
+                +-------------------------+
+
+Each of the above layers is recreated once again using CloudFormation to demonstrate tool-agility.
+
+---
+
+## ⚙️ Terraform Implementation
 
 ✔ 4 Private S3 Buckets  
-✔ Versioning enabled  
-✔ Public access blocked  
-✔ Custom VPC with CIDR `10.0.0.0/16`  
-✔ Public Subnet + Internet Gateway + Route table  
-✔ EC2 Instance (`t3.micro`)  
-✔ SSH allowed only from my IP: `99.251.70.231/32`  
-✔ RDS MySQL (`db.t3.micro`, MySQL 8.0)  
-✔ DB subnet group with 2 private subnets  
-✔ RDS MySQL port **3306** restricted to **my IP**
+✔ Versioning Enabled  
+✔ Public Access Block Enabled  
+✔ Custom VPC (10.0.0.0/16) with public subnet  
+✔ Internet Gateway + Route Table  
+✔ EC2 Instance (t3.micro) in Public Subnet  
+✔ Security Group – SSH only from my IP (`99.251.70.231/32`)  
+✔ Two DB subnets + Subnet Group  
+✔ MySQL RDS (`db.t3.micro`, MySQL 8.0) with SG access only from my IP  
+✔ Used **variables.tf** and **terraform.tfvars** (dynamic configuration)  
+✔ **Local backend** state management (per rubric)
 
-Terraform Structure
-terraform/
-├── main.tf
-├── variables.tf
-├── provider.tf
-├── backend.tf
-├── terraform.tfvars (ignored for security)
-
-📦 CloudFormation Infrastructure
-
-Three separate stacks were deployed:
-
-Stack Name	Template File	Output Provided
-zafar-s3-stack	cf-s3.yaml	S3 Bucket names
-zafar-ec2-stack	cf-ec2.yaml	EC2 Public IP
-zafar-rds-stack	cf-rds.yaml	RDS Endpoint
-
-CloudFormation Folder Structure
-cloudformation/
-├── cf-s3.yaml
-├── cf-ec2.yaml
-└── cf-rds.yaml
-
-📁 Overall Repository Structure
-final_infra_project/
-├── terraform/
-├── cloudformation/
-└── README.md
-
-
-### Commands Executed
+### Terraform Execution Commands
 
 ```bash
 terraform init
+terraform fmt
+terraform validate
 terraform plan
 terraform apply
 
